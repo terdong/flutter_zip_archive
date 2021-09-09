@@ -17,6 +17,6 @@ A new Flutter plugin.
   s.dependency 'Flutter'
   s.dependency 'SSZipArchive'
 
-  s.ios.deployment_target = '10.0'
+  s.ios.deployment_target = '9.0'
 end
 
