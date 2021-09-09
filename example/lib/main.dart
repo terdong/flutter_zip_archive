@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter_zip_archive/flutter_zip_archive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share/share.dart';
 
 void main() => runApp(MyApp());
 
@@ -63,9 +64,13 @@ class _MyAppState extends State<MyApp> {
     if (file == null) {
       return;
     }
+    Directory _testDir = Directory(_cacheDir.path + "/test/");
+    _testDir.createSync();
+    file.saveTo(_cacheDir.path + "/test/${file.name}");
     var _map = await FlutterZipArchive.zip(_cacheDir.path + "/test",
         _cacheDir.path + "/123.zip", _controller.text);
     print("_map:" + _map.toString());
+    Share.shareFiles([_map['path']], text: 'ZIP FILE');
   }
 
   Future _unzip() async {
