@@ -39,9 +39,9 @@ class _MyAppState extends State<MyApp> {
               MaterialButton(
                 color: Theme.of(context).primaryColor,
                 onPressed: () {
-                  _selectFile();
+                  _zip();
                 },
-                child: Text("SELECT FILE"),
+                child: Text("ZIP FILE"),
               ),
               MaterialButton(
                 color: Theme.of(context).primaryColor,
@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Future _selectFile() async {
+  Future _zip() async {
     var file = await ImagePicker().pickImage(source: ImageSource.gallery);
     Directory _cacheDir = await getTemporaryDirectory();
     if (file == null) {
