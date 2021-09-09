@@ -38,12 +38,16 @@ class _MyAppState extends State<MyApp> {
               ),
               MaterialButton(
                 color: Theme.of(context).primaryColor,
-                onPressed: _selectFile,
+                onPressed: () {
+                  _selectFile();
+                },
                 child: Text("SELECT FILE"),
               ),
               MaterialButton(
                 color: Theme.of(context).primaryColor,
-                onPressed: _unzip,
+                onPressed: () {
+                  _unzip();
+                },
                 child: Text("UNZIP"),
               )
             ],
