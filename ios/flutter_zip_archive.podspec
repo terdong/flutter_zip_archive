@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_zip_archive'
-  s.version          = '0.0.1'
+  s.version          = '1.0.0'
   s.summary          = 'A new Flutter plugin.'
   s.description      = <<-DESC
 A new Flutter plugin.
@@ -17,6 +17,6 @@ A new Flutter plugin.
   s.dependency 'Flutter'
   s.dependency 'SSZipArchive'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.0'
 end
 

@@ -1,11 +1,9 @@
 name: flutter_zip_archive
-description: A new Flutter plugin.
-version: 0.0.1
-author:
-homepage:
+description: ZIP and UNZIP Flutter plugin.
+version: 1.0.0
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:

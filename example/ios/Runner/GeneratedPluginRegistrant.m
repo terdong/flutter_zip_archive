@@ -3,9 +3,24 @@
 //
 
 #import "GeneratedPluginRegistrant.h"
+
+#if __has_include(<flutter_zip_archive/FlutterZipArchivePlugin.h>)
 #import <flutter_zip_archive/FlutterZipArchivePlugin.h>
-#import <image_picker/ImagePickerPlugin.h>
-#import <path_provider/PathProviderPlugin.h>
+#else
+@import flutter_zip_archive;
+#endif
+
+#if __has_include(<image_picker/FLTImagePickerPlugin.h>)
+#import <image_picker/FLTImagePickerPlugin.h>
+#else
+@import image_picker;
+#endif
+
+#if __has_include(<path_provider/FLTPathProviderPlugin.h>)
+#import <path_provider/FLTPathProviderPlugin.h>
+#else
+@import path_provider;
+#endif
 
 @implementation GeneratedPluginRegistrant
 
