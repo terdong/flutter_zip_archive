@@ -59,15 +59,15 @@ class _MyAppState extends State<MyApp> {
     if (file == null) {
       return;
     }
-    var _map = await FlutterZipArchive.zip(
-        _cacheDir.path + "/test", _cacheDir.path + "/123.zip", "1234");
+    var _map = await FlutterZipArchive.zip(_cacheDir.path + "/test",
+        _cacheDir.path + "/123.zip", _controller.text);
     print("_map:" + _map.toString());
   }
 
   Future _unzip() async {
     Directory _cacheDir = await getTemporaryDirectory();
     var _map = await FlutterZipArchive.unzip(
-        _cacheDir.path + "/123.zip", _cacheDir.path, "1234");
+        _cacheDir.path + "/123.zip", _cacheDir.path, _controller.text);
     print("_map:" + _map.toString());
   }
 }

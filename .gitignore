@@ -61,3 +61,4 @@ build/
 .project
 .classpath
 .settings
+example/ios/Flutter/Generated.xcconfig
