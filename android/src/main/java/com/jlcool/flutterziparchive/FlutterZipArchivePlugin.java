@@ -180,7 +180,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler {
         if (destDir.isDirectory() && !destDir.exists()) {
             destDir.mkdir();
         }
-        if (zFile.isEncrypted()) {
+        if (zFile.isEncrypted() && passwd != null && !passwd.equalsIgnoreCase("")) {
             zFile.setPassword(passwd.toCharArray());
         }
         zFile.extractAll(dest);
@@ -227,7 +227,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler {
         ZipParameters parameters = new ZipParameters();
         parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);           // 压缩方式
         parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);    // 压缩级别
-        if (passwd != null && passwd != "") {
+        if (passwd != null && !passwd.equalsIgnoreCase("")) {
             parameters.setEncryptFiles(true);
             parameters.setEncryptionMethod(Zip4jConstants.ENC_METHOD_STANDARD); // 加密方式
             parameters.setPassword(passwd.toCharArray());
