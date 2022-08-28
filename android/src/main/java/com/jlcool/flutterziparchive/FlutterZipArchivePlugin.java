@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -26,15 +27,21 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 /**
  * FlutterZipArchivePlugin
  */
-public class FlutterZipArchivePlugin implements MethodCallHandler {
-    /**
-     * Plugin registration.
-     */
-    public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_zip_archive");
-        channel.setMethodCallHandler(new FlutterZipArchivePlugin());
+public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin {
+    private MethodChannel channel;
+    private static final String CHANNEL_NAME = "flutter_zip_archive";
+    
+    @Override
+    public void onAttachedToEngine(FlutterPluginBinding flutterPluginBinding) {
+        channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL_NAME);
+        channel.setMethodCallHandler(this);
     }
-
+    
+    @Override
+    public void onDetachedFromEngine(FlutterPluginBinding flutterPluginBinding) {
+        channel.setMethodCallHandler(null);
+    }
+    
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         switch (call.method) {
