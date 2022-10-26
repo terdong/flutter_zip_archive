@@ -1,6 +1,8 @@
 package com.jlcool.flutterziparchive;
 
-import android.os.AsyncTask;
+//import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -22,7 +24,10 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
+//import io.flutter.plugin.common.PluginRegistry.Registrar;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * FlutterZipArchivePlugin
@@ -30,18 +35,18 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin {
     private MethodChannel channel;
     private static final String CHANNEL_NAME = "flutter_zip_archive";
-    
+
     @Override
     public void onAttachedToEngine(FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL_NAME);
         channel.setMethodCallHandler(this);
     }
-    
+
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding flutterPluginBinding) {
         channel.setMethodCallHandler(null);
     }
-    
+
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         switch (call.method) {
@@ -57,7 +62,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         }
     }
 
-    private class ZipTask extends AsyncTask<Void, Void, Map<String, Object>> {
+    private class ZipTask extends AsyncTaskExecutorService<Void, Void, Map<String, Object>> {
         private MethodCall call;
         private Result result;
 
@@ -67,13 +72,13 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         }
 
         @Override
-        protected Map<String, Object> doInBackground(Void... params) {
+        protected Map<String, Object> doInBackground(Void params) {
             return zip(call, result);
         }
 
         @Override
         protected void onPostExecute(Map<String, Object> data) {
-            super.onPostExecute(data);
+            //super.onPostExecute(data);
             this.result.success(data);
         }
     }
@@ -82,7 +87,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         String src = call.argument("src");
         String dest = call.argument("dest");
         String passwd = call.argument("password");
-        Map<String, Object> m1 = new HashMap();
+        Map<String, Object> m1 = new HashMap<String, Object>();
         String path = zip(src, dest, passwd);
         if (path == null) {
             m1.put("result", "fail");
@@ -93,7 +98,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         return m1;
     }
 
-    private class UnZipTask extends AsyncTask<Void, Void, Map<String, Object>> {
+    private class UnZipTask extends AsyncTaskExecutorService<Void, Void, Map<String, Object>> {
         private MethodCall call;
         private Result result;
 
@@ -103,13 +108,13 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         }
 
         @Override
-        protected Map<String, Object> doInBackground(Void... params) {
+        protected Map<String, Object> doInBackground(Void params) {
             return unzip(call, result);
         }
 
         @Override
         protected void onPostExecute(Map<String, Object> data) {
-            super.onPostExecute(data);
+            //super.onPostExecute(data);
             this.result.success(data);
         }
     }
@@ -118,7 +123,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         String zip = call.argument("zip");
         String dest = call.argument("dest");
         String passwd = call.argument("password");
-        Map<String, Object> m1 = new HashMap();
+        Map<String, Object> m1 = new HashMap<String, Object>();
         try {
             File[] _files = unzip(zip, dest, passwd);
             String[] _paths = new String[_files.length];
@@ -192,6 +197,7 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         }
         zFile.extractAll(dest);
 
+        @SuppressWarnings("unchecked")
         List<FileHeader> headerList = zFile.getFileHeaders();
         List<File> extractedFileList = new ArrayList<File>();
         for (FileHeader fileHeader : headerList) {
@@ -307,5 +313,74 @@ public class FlutterZipArchivePlugin implements MethodCallHandler, FlutterPlugin
         if (!destDir.exists()) {
             destDir.mkdirs();
         }
+    }
+}
+
+abstract class AsyncTaskExecutorService < Params, Progress, Result > {
+
+    private ExecutorService executor;
+    private Handler handler;
+
+    protected AsyncTaskExecutorService() {
+        executor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        });
+
+    }
+
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    public Handler getHandler() {
+        if (handler == null) {
+            synchronized(AsyncTaskExecutorService.class) {
+                handler = new Handler(Looper.getMainLooper());
+            }
+        }
+        return handler;
+    }
+
+    protected void onPreExecute() {
+        // Override this method whereever you want to perform task before background execution get started
+    }
+
+    protected abstract Result doInBackground(Params params);
+
+    protected abstract void onPostExecute(Result result);
+
+    protected void onProgressUpdate(Progress value) {
+        // Override this method whereever you want update a progress result
+    }
+
+    // used for push progress resport to UI
+    public void publishProgress(Progress value) {
+        getHandler().post(() -> onProgressUpdate(value));
+    }
+
+    public void execute() {
+        execute(null);
+    }
+
+    public void execute(Params params) {
+        getHandler().post(() -> {
+            onPreExecute();
+            executor.execute(() -> {
+                Result result = doInBackground(params);
+                getHandler().post(() -> onPostExecute(result));
+   });
+        });
+    }
+
+    public void shutDown() {
+        if (executor != null) {
+            executor.shutdownNow();
+        }
+    }
+
+    public boolean isCancelled() {
+        return executor == null || executor.isTerminated() || executor.isShutdown();
     }
 }
